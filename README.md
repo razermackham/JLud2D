@@ -60,6 +60,12 @@ They are located in the /redist folder.
 
 JLud2D uses [Maven](https://maven.apache.org/) as a Dependency Management system. An intermediate to experienced Java developer should have no problem working with the repository. Feel free to fork it and contribute.
 
+### Build example
+
+```bash
+mvn --file pom-ps.xml package
+```
+
 ### Tips
 
 - Jar files are case-sensitive, so be sure to check when looking for resources inside it: sounds, maps, animations, images, etc
