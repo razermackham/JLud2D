@@ -60,9 +60,14 @@ class EmuPlayer implements Runnable
 		
 		if ( line != null )
 		{
-			FloatControl mg = (FloatControl) line.getControl( FloatControl.Type.MASTER_GAIN );
-			if ( mg != null )
-				mg.setValue( (float) (Math.log( v ) / Math.log( 10.0 ) * 20.0) );
+			FloatControl mg = null;
+			try {
+				mg = (FloatControl) line.getControl( FloatControl.Type.MASTER_GAIN );
+				if ( mg != null )
+					mg.setValue( (float) (Math.log( v ) / Math.log( 10.0 ) * 20.0) );
+			} catch (IllegalArgumentException e) {
+				mg = (FloatControl) line.getControl( FloatControl.Type.VOLUME );
+			}
 		}
 	}
 	
