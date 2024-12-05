@@ -1,0 +1,182 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>JLud2D</groupId>
+	<artifactId>JLud2D</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<properties>
+	    <java.version>1.8</java.version>
+	    <teavm.version>0.10.2</teavm.version>
+	</properties>
+
+	<dependencies>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-io -->
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>1.3.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.6.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.6.3</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>2.10.0</version>
+		</dependency>
+
+		<!-- JAX-WS (java.xml.ws) for java11 -->
+		<dependency>
+			<groupId>com.sun.xml.ws</groupId>
+			<artifactId>jaxws-rt</artifactId>
+			<version>2.3.3</version>
+		</dependency>
+
+		<!-- Emulator of Java class library for TeaVM -->
+		<dependency>
+		  <groupId>org.teavm</groupId>
+		  <artifactId>teavm-classlib</artifactId>
+		  <version>${teavm.version}</version>
+		  <scope>provided</scope>
+		</dependency>
+
+		<!-- JavaScriptObjects (JSO) - a JavaScript binding for TeaVM -->
+		<dependency>
+		  <groupId>org.teavm</groupId>
+		  <artifactId>teavm-jso-apis</artifactId>
+		  <version>${teavm.version}</version>
+		  <scope>provided</scope>
+		</dependency>
+
+		<!-- Servlet specification -->
+		<dependency>
+		  <groupId>jakarta.servlet</groupId>
+		  <artifactId>jakarta.servlet-api</artifactId>
+		  <version>6.0.0</version>
+		  <scope>provided</scope>
+		</dependency>
+
+	</dependencies>
+
+
+	<build>
+		<sourceDirectory>src</sourceDirectory>
+		<plugins>
+			<plugin>
+				<!-- Configure Java compiler to use Java version syntax  -->
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.1</version>
+				<configuration>
+				    <source>${java.version}</source>
+				    <target>${java.version}</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<!-- set main for missing manifest -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.2.0</version>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<Main-Class>demos.ps.Phantasy</Main-Class>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+			<plugin>
+				<!-- package dependencies -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.1.1</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- add resources -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.2.0</version>
+				<executions>
+					<execution>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.outputDirectory}</outputDirectory>
+							<resources>
+								<resource>
+									<directory>src/demos/ps</directory>
+									<includes>
+										<include>**/*</include>
+									</includes>
+									<targetPath>demos/ps</targetPath>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Configure TeaVM -->
+				<groupId>org.teavm</groupId>
+				<artifactId>teavm-maven-plugin</artifactId>
+				<version>${teavm.version}</version>
+				<executions>
+				  <execution>
+				    <id>web-client</id>
+				    <goals>
+				      <goal>compile</goal>
+				    </goals>
+				    <configuration>
+				      <!-- Directory where TeaVM should put generated files. This configuration conforms to the settings
+					   of the WAR plugin -->
+				      <targetDirectory>${project.build.directory}/generated/js/teavm</targetDirectory>
+
+				      <!-- Main class, containing static void main(String[]) -->
+				      <mainClass>demos.ps.Phantasy</mainClass>
+
+				      <!-- Whether TeaVM should produce minified JavaScript. Can reduce JavaScript file size more than
+					   two times -->
+				      <minifying>false</minifying>
+
+				      <!-- Whether TeaVM should produce debug information for its built-in debugger -->
+				      <debugInformationGenerated>true</debugInformationGenerated>
+
+				      <!-- Whether TeaVM should produce source maps file -->
+				      <sourceMapsGenerated>true</sourceMapsGenerated>
+
+				      <!-- Whether TeaVM should also put source files into output directory,
+					   for compatibility with source maps -->
+				      <sourceFilesCopied>true</sourceFilesCopied>
+
+				      <!-- Optimization level. Valid values are: SIMPLE, ADVANCED, FULL -->
+				      <optimizationLevel>ADVANCED</optimizationLevel>
+				    </configuration>
+				  </execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>
