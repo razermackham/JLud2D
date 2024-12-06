@@ -107,9 +107,9 @@ public class Title {
 							 PSGame.getString("Title_Newgame_Extended"),
 							 PSGame.getString("Title_Newgame_PSArena")}, true);
 		PSMenu.instance.push(gameMenu);
-		gameMenu.setDisabled(2);
-		gameMenu.setDisabled(3);
-		gameMenu.setDisabled(4);
+		//gameMenu.setDisabled(2);
+		//gameMenu.setDisabled(3);
+		//gameMenu.setDisabled(4);
 		int opt = PSMenu.instance.waitOpt(Cancellable.TRUE);
 		PSMenu.instance.pop();
 		
