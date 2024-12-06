@@ -264,6 +264,15 @@ public class PSBattle {
 					continue;
 				} else if(outcome == BattleOutcome.TALK) {
 					return outcome;
+				} else if(outcome == BattleOutcome.ESCAPE) {
+					opt = 0; // Back to main menu
+					PSEffect runEffect = new PSEffect(Effect.RUN);
+					runEffect.setTargets(battlers);
+					if(runEffect.callEffect() == EffectOutcome.SUCCESS) {
+						cleanPlayerStatus(battlers);
+						Script.stopmusic();
+						return BattleOutcome.ESCAPE;
+					}
 				}
 			}
 			
@@ -520,8 +529,10 @@ public class PSBattle {
 					PSGame.getString("Menu_Battle_Attack"),
 					PSGame.getString("Menu_Battle_Magic"),
 					PSGame.getString("Menu_Battle_Item"),
-					PSGame.getString("Menu_Battle_Defend")}, false));
-			PSMenu.instance.push(PSMenu.instance.createLabelBox(6, 77, new String[]{" " + format(p.getName(), 6, true)}, true));
+					PSGame.getString("Menu_Battle_Defend"),
+					PSGame.getString("Menu_Battle_Run"),
+				}, false));
+			PSMenu.instance.push(PSMenu.instance.createLabelBox(6, 92, new String[]{" " + format(p.getName(), 6, true)}, true));
 			//PSMenu.instance.push(PSMenu.instance.createLabelBox(10, 82, new String[]{members.get(currentMember).getName()}, true));
 			int actionOpt = PSMenu.instance.waitOpt(Cancellable.TRUE) + 1;
 			
@@ -608,6 +619,11 @@ public class PSBattle {
 			else if(actionOpt == 4) {
 				p.action = Action.DEFEND;
 				gotoNextChar = true;
+			}
+			else if(actionOpt == 5) { // RUN
+				PSMenu.instance.pop();
+				PSMenu.instance.pop();
+				return BattleOutcome.ESCAPE;
 			}
 
 			PSMenu.instance.pop();
