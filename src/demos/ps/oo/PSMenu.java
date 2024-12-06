@@ -332,7 +332,8 @@ public class PSMenu {
 				//instance.drawMenus();
 				//screen.fadein(25,  false);
 				if(!TEST_SIMULATION) {
-					instance.waitReady(menuScrollerText);
+					// Temporarily disable to allow skipping
+					//instance.waitReady(menuScrollerText);
 					instance.waitB1();
 
 					// If last chunck of text, fade out
