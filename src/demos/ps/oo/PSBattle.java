@@ -1023,8 +1023,8 @@ public class PSBattle {
 		int gainedExp = 0, gainedMst = 0;
 		for(Battler b: battlers) {
 			if(b instanceof EnemyBattler) {
-				gainedExp+= ((EnemyBattler)b).getEnemy().exp;
-				gainedMst+= ((EnemyBattler)b).getEnemy().mst;
+				gainedExp+= ((EnemyBattler)b).getEnemy().exp * PSGame.gameData.expMultiplier;
+				gainedMst+= ((EnemyBattler)b).getEnemy().mst * PSGame.gameData.mstMultiplier;
 				if(((EnemyBattler)b).getEnemy().item == HasItem.COLA) {
 					item = PSGame.getItem(OriginalItem.Inventory_Monomate);
 				} else if(((EnemyBattler)b).getEnemy().item == HasItem.DIMATE) {

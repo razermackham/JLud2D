@@ -32,6 +32,8 @@ public class GameData implements Serializable {
 	int musicVolume = 30; // 0-100
 	int soundVolume = 50; // 0-100
 	int dungeonDelay = 4; // varies between 1-4
+	int expMultiplier = 4;
+	int mstMultiplier = 4;
 	boolean battleInformation = true;
 	Locale locale;
 	static ResourceBundle rb;
