@@ -284,7 +284,7 @@ public class PSDungeon {
 			}
 			else if(fromTile != FLOOR && destTile == FLOOR) {
 			        // If transitioning from a non-floor to a floor tile, play the curl animation frames in reverse.
-				doReverseAnimation(img_dungeon_curl, !counterclockwise, 1);
+				doReverseAnimation(img_dungeon_curl, !counterclockwise);
 			}				
 			else if(fromTile == FLOOR && destTile == FLOOR) {
 			        // If both the starting and destination tiles are floors, play the corner animation.
@@ -402,34 +402,50 @@ public class PSDungeon {
 	}
 
 	private void doAnimation(VImage[] vImages, boolean roundTrip, boolean flipped) {
-		// Step one-way (forward) through animation frames
-		for(int i=0; i<vImages.length; i++) {
-			putimage(vImages[i], flipped ? 1: 0);
+		if(!roundTrip) {
+			// Step one-way (forward) through animation frames
+			for(int i=0; i<vImages.length; i++) {
+				putimage(vImages[i], flipped ? 1: 0);
+				delayScreen();
+			}
+		} else {
+			// 45 degree turn, walk "up" and "down" animation frames
+			// Stop at 2nd to last frame
+			for(int i=0; i<vImages.length-1; i++) {
+				putimage(vImages[i], flipped ? 1: 0);
+				delayScreen();
+			}
+
+			// Last frame is only half of image
+			// Put left half
+			putimage(vImages[vImages.length-1], 0);
+			// Put right half
+			putimage(vImages[vImages.length-1], 1);
 			delayScreen();
-		}
-		if (roundTrip) {
-			// 45 degree turn, walk back through animation frames in reverse, starting from 2nd to last frame
-			// flip images
-			doReverseAnimation(vImages, !flipped, 2);
+
+			// Start from 2nd to last frame and walk back down
+			for(int i=vImages.length-2; i>=0; i--) {
+				putimage(vImages[i], !flipped ? 1: 0);
+				delayScreen();
+			}
 		}
 	}
 	
-	private void doReverseAnimation(VImage[] vImages, boolean flipped, int lastFrameStart) {
+	private void doReverseAnimation(VImage[] vImages, boolean flipped) {
 		// Step one-way (reverse) through animation frames
 		// flipped is boolean indicating whether images are flipped horizontally
-		// lastFrameStart is int with 1 being last frame, 2 being second from last
-		for(int i = vImages.length - lastFrameStart; i >= 0; i--) {
+		for(int i = vImages.length - 1; i >= 0; i--) {
 			putimage(vImages[i], flipped ? 1: 0);
 			delayScreen();
 		}
 	}
 
 	private int putimage(VImage img, int offset, int flipped) {
-		// Draws an image at a specified offset, optionally flipping it.
+		// Draws an image at a specified left offset, optionally flipping it.
 		if(flipped == 0) {
 			backDungeon.blit(offset, 0, img);
-		}
-		else {
+		} else {
+			// Calculate x using offset and image width from right edge of screen.
 			backDungeon.flipBlit(TOTAL_XSIZE - offset - img.width, 0, FlipType.FLIP_HORIZONTALLY, img);
 		}
 		return offset + img.width;
@@ -447,10 +463,10 @@ public class PSDungeon {
 		putimage(img_dungeon_wall1, 0, 1);
 	}	
 
-	public static int gettile(int xPixelCoordinate, int yPixelCoordinate) {
-		// Retrieves the tile at the given x and y coordinates, adjusted by a tile size of 16.
+	public static int gettile(int x, int y) {
+		// Retrieves the tile at the given x and y coordinates, bound by dungeon size of 16x16?.
 		// If the tile value is 0, return 0; otherwise, return the tile value minus 1.
-		return current_map.gettile(xPixelCoordinate/16, yPixelCoordinate/16, 0) == 0? 0: current_map.gettile(xPixelCoordinate/16, yPixelCoordinate/16, 0) - 1;
+		return current_map.gettile(x/16, y/16, 0) == 0? 0: current_map.gettile(x/16, y/16, 0) - 1;
 	}
 	
 	private static int getfronttile(Entity e, int pos) {

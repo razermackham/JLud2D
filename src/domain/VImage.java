@@ -278,6 +278,8 @@ public class VImage implements Transferable {
 	       	this.blit(x,y,flippedImage);*/
 
 			if(type == FlipType.FLIP_HORIZONTALLY) {
+				// negative width flips the image
+				// negative width also draws right to left, so x-coordinate is right edge of image (instead of left edge)
 				this.g.drawImage(src.image, src.getWidth()+x, y, -src.getWidth(), src.getHeight(), null);
 				//this.blit(x, y, flipimage(0,0,src.image));
 			}
