@@ -264,23 +264,31 @@ public class PSDungeon {
 		setentitiespaused(false);
 	}
 	
-	private void turnRoutine(Entity e, boolean counter) {
+	private void turnRoutine(Entity e, boolean counterclockwise) {
+		// Handles turning animation and log based upon facing direction.
+		// Tiles can be either FLOORS or WALLS, DOORS, ROOMS, etc.
 		int fromTile = getfronttile(e,  1);
-		e.setFace(nextDirection(e.getFace(), counter));
+		e.setFace(nextDirection(e.getFace(), counterclockwise));
 		int destTile = getfronttile(e,  1);
 		
 		if(showDungeon) {
 			if(fromTile != FLOOR && destTile != FLOOR) {
-				doAnimation(img_dungeon_curve, true, counter); 
+			        // If neither the starting nor destination tile is a floor, play the curve animation.
+				// img_dungeon_curve is hard-coded as a counterclockwise turn;
+				doAnimation(img_dungeon_curve, true, counterclockwise);
 			}
 			else if(fromTile == FLOOR && destTile != FLOOR) {
-				doAnimation(img_dungeon_curl, false, counter);
+			        // If transitioning from a floor to a non-floor tile, play the curl animation.
+				// img_dungeon_curl is hard-coded as a counterclockwise turn;
+				doAnimation(img_dungeon_curl, false, counterclockwise);
 			}
 			else if(fromTile != FLOOR && destTile == FLOOR) {
-				doReverseAnimation(img_dungeon_curl, !counter);
+			        // If transitioning from a non-floor to a floor tile, play the curl animation frames in reverse.
+				doReverseAnimation(img_dungeon_curl, !counterclockwise);
 			}				
 			else if(fromTile == FLOOR && destTile == FLOOR) {
-				doAnimation(img_dungeon_corner, true, !counter);
+			        // If both the starting and destination tiles are floors, play the corner animation.
+				doAnimation(img_dungeon_corner, true, !counterclockwise);
 			}
 		}
 		else {
@@ -393,38 +401,31 @@ public class PSDungeon {
 		
 	}
 
-	private void doAnimation(VImage[] vImages, boolean goBack, boolean flipped) {
-		// Normal animation
-		if(!goBack) {
-			for(int i=0; i<vImages.length; i++) {
-				putimage(vImages[i], flipped ? 1: 0);
-				delayScreen();
-			}
-		}
-		// Flip back algorithm
-		else {
-			for(int i=0; i<vImages.length-1; i++) {
-				putimage(vImages[i], flipped ? 1: 0);
-				delayScreen();
-			}
-			putimage(vImages[vImages.length-1], 0);
-			putimage(vImages[vImages.length-1], 1);
+	private void doAnimation(VImage[] vImages, boolean roundTrip, boolean flipped) {
+		// Step one-way (forward) through animation frames
+		for(int i=0; i<vImages.length; i++) {
+			putimage(vImages[i], flipped ? 1: 0);
 			delayScreen();
-			for(int i=vImages.length-2; i>=0; i--) {
-				putimage(vImages[i], !flipped ? 1: 0);
-				delayScreen();
-			}			
+		}
+		if (roundTrip) {
+			// 45 degree turn, walk back through animation frames in reverse, starting from 2nd to last frame
+			// flip images
+			doReverseAnimation(vImages, !flipped, 2);
 		}
 	}
 	
-	private void doReverseAnimation(VImage[] vImages, boolean flipped) {
-		for(int i=vImages.length-1; i>=0; i--) {
+	private void doReverseAnimation(VImage[] vImages, boolean flipped, int lastFrameStart) {
+		// Step one-way (reverse) through animation frames
+		// flipped is boolean indicating whether images are flipped horizontally
+		// lastFrameStart is int with 1 being last frame, 2 being second from last
+		for(int i = vImages.length - lastFrameStart; i >= 0; i--) {
 			putimage(vImages[i], flipped ? 1: 0);
 			delayScreen();
 		}
 	}
 
 	private int putimage(VImage img, int offset, int flipped) {
+		// Draws an image at a specified offset, optionally flipping it.
 		if(flipped == 0) {
 			backDungeon.blit(offset, 0, img);
 		}
@@ -435,6 +436,7 @@ public class PSDungeon {
 	}
 
 	private int putimage(VImage img, int flipped) {
+		// Overloaded version of putimage, defaults to an offset of 0.;
 		return putimage(img, 0, flipped);
 	}
 
@@ -445,11 +447,17 @@ public class PSDungeon {
 		putimage(img_dungeon_wall1, 0, 1);
 	}	
 
-	public static int gettile(int x, int y) {
-		return current_map.gettile(x/16, y/16, 0) == 0? 0: current_map.gettile(x/16, y/16, 0) - 1;
+	public static int gettile(int xPixelCoordinate, int yPixelCoordinate) {
+		// Retrieves the tile at the given x and y coordinates, adjusted by a tile size of 16.
+		// If the tile value is 0, return 0; otherwise, return the tile value minus 1.
+		return current_map.gettile(xPixelCoordinate/16, yPixelCoordinate/16, 0) == 0? 0: current_map.gettile(xPixelCoordinate/16, yPixelCoordinate/16, 0) - 1;
 	}
 	
 	private static int getfronttile(Entity e, int pos) {
+		// Determines the tile in front of the entity based on its facing direction.
+		// Origin (0,0) is NW corner
+		// x,y are pixel coordinates, pos is tile count (each tile is 16x16 pixels)
+		// E.g. If an entity is facing NORTH, getfronttile(e, 2) will check the tile located 32 pixels (2 tiles) above the entity
 		switch(e.getFace()) {
 		case Entity.NORTH: return gettile(e.getx(), e.gety()-16*pos);
 		case Entity.WEST: return gettile(e.getx()-16*pos, e.gety());
