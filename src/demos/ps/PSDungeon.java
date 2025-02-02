@@ -284,7 +284,7 @@ public class PSDungeon {
 			}
 			else if(fromTile != FLOOR && destTile == FLOOR) {
 			        // If transitioning from a non-floor to a floor tile, play the curl animation frames in reverse.
-				doReverseAnimation(img_dungeon_curl, !counterclockwise);
+				doReverseAnimation(img_dungeon_curl, !counterclockwise, 1);
 			}				
 			else if(fromTile == FLOOR && destTile == FLOOR) {
 			        // If both the starting and destination tiles are floors, play the corner animation.
