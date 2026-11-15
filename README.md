@@ -52,6 +52,53 @@ npm run build       # type-check + production build → dist/
 npm run preview      # serve the production build locally
 ```
 
+### Run with Podman or Docker
+
+No local Node.js install needed — the [`Dockerfile`](Dockerfile) has one stage per use case. It is Podman-friendly (fully qualified base images, rootless-safe: the web stage runs as a non-root user on port 8080, and nothing needs a privileged port).
+
+Play the built game (nginx, port 8080):
+
+```bash
+podman build -t jlud2d:play .              # add --target play to be explicit
+podman run --rm -p 8080:8080 jlud2d:play
+# → http://localhost:8080
+```
+
+Develop with hot module reload (Vite, port 3080):
+
+```bash
+podman build --target dev -t jlud2d:dev .
+podman run --rm -it -p 3080:3080 \
+  -v "$PWD:/app:Z" -v jlud2d_node_modules:/app/node_modules \
+  jlud2d:dev
+# → http://localhost:3080
+```
+
+The `:Z` suffix relabels the bind mount for SELinux (Fedora/RHEL); drop it on hosts without SELinux. The named volume keeps the image's `node_modules` visible under the mount — delete it (`podman volume rm jlud2d_node_modules`) after dependency changes.
+
+Or use Compose (works with `podman-compose` and `docker compose`):
+
+```bash
+podman-compose up -d play     # http://localhost:8080
+podman-compose up dev         # http://localhost:3080
+```
+
+Run the checks in a container:
+
+```bash
+podman build --target test -t jlud2d:test .
+```
+
+The optional "Phantasy Cloud" save backend is compiled in through build args; without them the game builds and runs with cloud save reported as unavailable:
+
+```bash
+podman build -t jlud2d:play \
+  --build-arg VITE_SUPABASE_URL="https://your-project.supabase.co" \
+  --build-arg VITE_SUPABASE_ANON_KEY="your-anon-key" .
+```
+
+Two notes: the built page loads Phaser from a CDN (`cdn.jsdelivr.net`), so the browser needs internet access, and under rootful Docker the dev container (which runs as root) may create a root-owned `public/vgm-worklet.js` in your checkout — rootless Podman maps it to your own user, so prefer Podman on Linux.
+
 ### Other useful commands
 
 ```bash

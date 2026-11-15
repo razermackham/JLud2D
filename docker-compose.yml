@@ -1,0 +1,43 @@
+# Podman-compose / docker compose definitions for JLud2D.
+#
+#   podman-compose up -d play    # playable site  → http://localhost:8080
+#   podman-compose up dev        # dev server     → http://localhost:3080
+#   podman-compose build         # rebuild both images
+#
+# Both services build from the same multi-stage Dockerfile (see its `target`s).
+
+services:
+  # Production-style: the built site served by nginx as a non-root user.
+  play:
+    build:
+      context: .
+      target: play
+      args:
+        # Optional "Phantasy Cloud" configuration; leave unset to disable it.
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-}
+        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY:-}
+    image: localhost/jlud2d:play
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  # Development: Vite dev server with hot module reload. The repository is
+  # bind-mounted over /app, and a named volume keeps the container's
+  # node_modules (installed by the image) from being hidden by the mount.
+  # If dependencies change, recreate the volume: podman-compose down -v
+  dev:
+    build:
+      context: .
+      target: dev
+    image: localhost/jlud2d:dev
+    command: npm run dev -- --host 0.0.0.0 --port 3080
+    ports:
+      - "3080:3080"
+    volumes:
+      - .:/app:Z
+      - node_modules:/app/node_modules
+    environment:
+      BROWSER: none
+
+volumes:
+  node_modules:
